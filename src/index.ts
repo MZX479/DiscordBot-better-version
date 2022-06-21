@@ -41,7 +41,7 @@ fs.readdir('./commands', async (err, commands_dir) => {
     console.log('Started loading /-commands');
     await rest.put(
       Routes.applicationGuildCommands(
-        '827619223714398278',
+        '988734745393389590',
         '827620881529307217'
       ),
       {
