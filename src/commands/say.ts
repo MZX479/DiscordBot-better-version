@@ -1,6 +1,7 @@
 import * as Discord from 'discord.js';
 import * as DB from 'mongodb';
 import { type Command } from '../types';
+import { UserType } from '../types';
 
 /*SUB_COMMAND	1	
 SUB_COMMAND_GROUP	2	
