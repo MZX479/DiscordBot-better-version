@@ -2,6 +2,7 @@ import * as Discord from 'discord.js';
 import * as DB from 'mongodb';
 import { type Command } from '../types';
 import { UserType } from '../types';
+import { Response } from '../exports';
 
 /*
 SUB_COMMAND	1	
@@ -17,121 +18,93 @@ NUMBER	10	Any double between -2^53 and 2^53
 ATTACHMENT	11 
 */
 
+//const new_ballance = (_get_data._get_users_data!.coins || 0) + amount
+//const new_cooldown = (_get_data._get_users_data?.daily_cooldown || 0) + cooldown
+
 const command: Command = {
   slash: {
     name: 'daily',
-    description: '100 money"s every day',
+    description: 'just a daily command',
   },
   async execute(bot, f, mongo, args, interaction) {
     const db: DB.Db = mongo.db(interaction.guild!.id);
     try {
-      class Daily {
-        readonly amount: number = 100;
+      class Daily extends Response {
+        readonly amount: number = 500;
+        time: Date;
         constructor() {
+          super(interaction);
+          this.time = new Date();
+
           this.start();
         }
-
         async start() {
-          const cooldown: number = 86000000;
-          const new_cooldown = <number>new Date().getTime() + cooldown;
+          const time = this.time.getTime();
+          const cooldown = time + 86000000;
 
-          const db = new DB();
+          const db_require = new DB();
 
-          const _get_member_data = await db._get_member_data(
-            interaction.user.id
-          );
+          const _get_member_data = await db_require._get_member_data();
 
           if (
-            _get_member_data._get_member_data?.daily_cooldown &&
-            _get_member_data._get_member_data.daily_cooldown >
-              new Date().getTime()
-          )
-            return interaction.followUp({
-              embeds: [
-                {
-                  author: {
-                    name: interaction.user.tag,
-                    icon_url: interaction.user.avatarURL({ dynamic: true })!,
-                  },
-                  description: 'Your cooldown was not expired!',
-                },
-              ],
-              ephemeral: true,
-            });
+            _get_member_data._get_users_data?.daily_cooldown &&
+            _get_member_data._get_users_data.daily_cooldown > time
+          ) {
+            return this.reply_false(
+              'Your cooldown did not expired',
+              { timestamp: this.time },
+              true
+            );
+          }
 
-          await db._overwrite_member_data(
-            interaction.user.id,
-            this.amount,
-            new_cooldown
-          );
+          const new_ballance =
+            (_get_member_data._get_users_data?.coins! || 0) + this.amount;
+          const new_cooldown =
+            (_get_member_data._get_users_data?.daily_cooldown || 0) + cooldown;
 
-          interaction.followUp({
-            embeds: [
-              {
-                author: {
-                  name: interaction.user.tag,
-                  icon_url: interaction.user.avatarURL({ dynamic: true })!,
-                },
-                description: 'Success!',
-              },
-            ],
-            ephemeral: false,
-          });
+          await db_require._overwrite_member_data(new_ballance, new_cooldown);
+
+          await this.reply_true('Success', { timestamp: this.time });
         }
       }
 
       class DB {
-        async _get_member_data(member_id: string) {
+        async _get_member_data() {
           const users_db = db.collection('users');
 
-          const _get_member_data = await users_db.findOne<UserType>({
-            login: member_id,
+          const _get_users_data = await users_db.findOne<UserType>({
+            login: interaction.user.id,
           });
 
-          const return_info = {
+          const info_return = {
             users_db,
-            _get_member_data,
+            _get_users_data,
           };
 
-          return return_info;
+          return info_return;
         }
 
-        async _overwrite_member_data(
-          member_id: string,
-          amount: number,
-          cooldown: number
-        ) {
-          if (!member_id || !amount)
-            throw new Error(
-              `${member_id} or ${amount}, ${cooldown} were not provided!`
-            );
+        async _overwrite_member_data(amount: number, cooldown: number) {
+          if (!amount || !cooldown)
+            throw new Error(`${amount} or ${cooldown} were not provided!`);
 
-          const _get_member_data = await this._get_member_data(
-            interaction.user.id
-          );
+          const _get_data = await this._get_member_data();
 
-          const new_ballance =
-            <number>(_get_member_data._get_member_data?.coins || 0) + amount;
-
-          const new_cooldown =
-            <number>(_get_member_data._get_member_data?.daily_cooldown || 0) +
-            cooldown;
-
-          if (!_get_member_data._get_member_data?.login) {
-            _get_member_data.users_db.insertOne({
-              login: member_id,
-              coins: new_ballance,
-              daily_cooldown: new_cooldown,
+          if (!_get_data._get_users_data?.login) {
+            _get_data.users_db.insertOne({
+              login: interaction.user.id,
+              coins: amount,
+              daily_cooldown: cooldown,
             });
           } else {
-            _get_member_data.users_db.updateOne(
+            _get_data.users_db.updateOne(
               {
-                login: member_id,
+                login: interaction.user.id,
               },
               {
                 $set: {
-                  coins: new_ballance,
-                  daily_cooldown: new_cooldown,
+                  coins: amount,
+                  daily_cooldown: cooldown,
                 },
               }
             );
