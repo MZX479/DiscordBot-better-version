@@ -2,6 +2,7 @@ import * as Discord from 'discord.js';
 import * as DB from 'mongodb';
 import { type Command } from '../types';
 import { UserType } from '../types';
+import { Response } from '../exports';
 
 /*
 SUB_COMMAND	1	
@@ -19,8 +20,8 @@ ATTACHMENT	11
 
 const command: Command = {
   slash: {
-    name: '',
-    description: '',
+    name: 'addmoney',
+    description: 'adding money',
     options: [
       {
         name: 'amount',
@@ -45,9 +46,10 @@ const command: Command = {
   async execute(bot, f, mongo, args, interaction) {
     const db: DB.Db = mongo.db(interaction.guild!.id);
     try {
-      class Add_money {
+      class Add_money extends Response {
         member_id!: string;
         constructor() {
+          super(interaction);
           this.member_id;
 
           this.main();
@@ -58,20 +60,24 @@ const command: Command = {
             args.filter((arg) => arg.name === 'amount')[0].value
           );
           let member = <Discord.GuildMember>(
-            args.filter((arg) => arg.name === 'member')[0].member
+            args.filter((arg) => arg.name === 'member')[0]?.member
           );
+
           let member_id = <string>(
-            args.filter((arg) => arg.name === 'id')[0].value
+            args.filter((arg) => arg.name === 'id')[0]?.value
           );
 
           if (!member && member_id) {
             member = await interaction.guild!.members.fetch(member_id);
-            member_id = member.id;
           }
 
-          this.member_id = member_id;
+          this.member_id = member.id;
 
           const _get_member_data = await this._get_member_data();
+
+          await this._overwrite_member_data(member.id, amount);
+
+          this.reply_true('success!', { timestamp: new Date() });
         }
 
         async _get_member_data() {
@@ -81,7 +87,7 @@ const command: Command = {
             login: this.member_id,
           });
 
-          const user_ball = <number>_get_members_data!.coins;
+          const user_ball = <number>_get_members_data?.coins;
 
           const return_info = {
             users_db,
@@ -92,22 +98,24 @@ const command: Command = {
           return return_info;
         }
 
-        async _overwrite_member_data(amount: number) {
+        async _overwrite_member_data(member_id: string, amount: number) {
           if (!amount) throw new Error(`${amount} was not provided!`);
 
           const _get_data = await this._get_member_data();
 
-          const coins = _get_data.user_ball + amount;
+          const coins = <number>(_get_data.user_ball || 0) + amount;
 
-          if (!_get_data._get_members_data!.login) {
+          console.log(_get_data._get_members_data);
+
+          if (!_get_data._get_members_data?.login) {
             _get_data.users_db.insertOne({
-              login: this.member_id,
+              login: member_id,
               coins,
             });
           } else {
             _get_data.users_db.updateOne(
               {
-                login: this.member_id,
+                login: member_id,
               },
               {
                 $set: {
@@ -118,6 +126,7 @@ const command: Command = {
           }
         }
       }
+      new Add_money();
     } catch (err) {
       let e = <{ message: string; name: string }>err;
       bot.users.cache

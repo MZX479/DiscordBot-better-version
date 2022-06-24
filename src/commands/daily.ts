@@ -30,7 +30,7 @@ const command: Command = {
     const db: DB.Db = mongo.db(interaction.guild!.id);
     try {
       class Daily extends Response {
-        readonly amount: number = 500;
+        readonly amount: 500 = 500;
         time: Date;
         constructor() {
           super(interaction);
