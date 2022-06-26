@@ -20,70 +20,82 @@ const command: Command = {
   slash: {
     name: 'avatar',
     description: 'display member"s avatar',
-    options: [{
-      name: 'member',
-      description: 'choose a member',
-      type: 6,
-      required: false
-    }, {
-      name: 'id',
-      description: 'use id of current member',
-      type: 3,
-      required: false
-    }]
+    options: [
+      {
+        name: 'member',
+        description: 'choose a member',
+        type: 6,
+        required: false,
+      },
+      {
+        name: 'id',
+        description: 'use id of current member',
+        type: 3,
+        required: false,
+      },
+    ],
   },
   async execute(bot, f, mongo, args, interaction) {
     const db: DB.Db = mongo.db(interaction.guild!.id);
     try {
-
       async function start() {
-        main()
+        main();
 
-        avatar_response()
+        avatar_response();
       }
-      async function main () {
-        let member = <Discord.GuildMember>args.filter((arg) => arg.name === 'member')[0]?.member
-        let member_id = <string>args.filter((arg) => arg.name === 'id')[0]?.value
+      async function main() {
+        let member = <Discord.GuildMember>(
+          args.filter((arg) => arg.name === 'member')[0]?.member
+        );
+        let member_id = <string>(
+          args.filter((arg) => arg.name === 'id')[0]?.value
+        );
 
-        if(!member && member_id) {
-          member = await interaction.guild!.members.fetch(member_id)
+        if (!member && member_id) {
+          member = await interaction.guild!.members.fetch(member_id);
         }
 
-        if(!member_id && !member) {
-            return interaction.followUp({
-              embeds: [{
+        if (!member_id && !member) {
+          return interaction.followUp({
+            embeds: [
+              {
                 color: 'DARK_RED',
-                description: 'provide a member please!'
-              }]
-            })
+                description: 'provide a member please!',
+              },
+            ],
+          });
         }
 
-        let return_info = {member}
+        let return_info = { member };
 
-        return return_info
+        return return_info;
       }
 
-    async function avatar_response() {
-        let info = await main()
+      async function avatar_response() {
+        let info = await main();
 
         interaction.followUp({
-          embeds:[{
-            author: {
-              name: interaction.user.tag,
-              icon_url: interaction.user.avatarURL({dynamic: true})!
+          embeds: [
+            {
+              author: {
+                name: interaction.user.tag,
+                icon_url: interaction.user.avatarURL({ dynamic: true })!,
+              },
+              color: 'GREEN',
+              image: {
+                url: (info.member! as Discord.GuildMember).displayAvatarURL({
+                  dynamic: true,
+                }),
+              },
+              timestamp: new Date(),
             },
-            color: 'GREEN',
-            image: {
-              url: info.member?.user!.avatarURL({dynamic: true})
-            },
-            timestamp: new Date()
-          }]
-        })
-    }
+          ],
+        });
+      }
 
-    start()
-  } catch (err) {
-    let e = <{ message: string; name: string }>err;
+      start();
+    } catch (err) {
+      let e = <{ message: string; name: string }>err;
       bot.users.cache
         .get(f.config.owner)
         ?.send(`**ERROR** \`${e.name}\`\n\`${e.message}\``);

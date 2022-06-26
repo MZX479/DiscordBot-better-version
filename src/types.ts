@@ -24,16 +24,15 @@ export type modulesType = {
 
 export type argsType = Readonly<CommandInteractionOption[]>;
 
-export type UserType = {
-  login?: string;
-  coins?: number;
-  daily_cooldown?: number;
-  reputation?: number;
-  isMuted?: {};
-  mutes?: Array<{}>;
-  rep_cooldown?: number;
-};
-
+export type UserType = Partial<{
+  login: string;
+  coins: number;
+  daily_cooldown: number;
+  reputation: number;
+  isMuted: {};
+  mutes: Array<{}>;
+  rep_cooldown: number;
+}>;
 export type slashType = {
   name: string;
   description: string;

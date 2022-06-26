@@ -1,6 +1,12 @@
 import * as Discord from 'discord.js';
 import * as DB from 'mongodb';
 import { type Command } from '../types';
+import { UserType } from '../types';
+
+type fieldType = {
+  name: string;
+  value: string;
+};
 
 /*
 SUB_COMMAND	1	
@@ -18,12 +24,20 @@ ATTACHMENT	11
 
 const command: Command = {
   slash: {
-    name: 'clean',
-    description: 'clear around 32 messages',
+    name: 'lb',
+    description: 'lb board',
   },
   async execute(bot, f, mongo, args, interaction) {
     const db: DB.Db = mongo.db(interaction.guild!.id);
     try {
+      class Pages {
+        constructor() {
+          this.main();
+        }
+
+        async main() {}
+      }
+      new Pages();
     } catch (err) {
       let e = <{ message: string; name: string }>err;
       bot.users.cache
