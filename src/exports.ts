@@ -87,6 +87,7 @@ export interface Warn {
   time: number;
   moderator: string;
   reason: string;
+  victim: string;
 }
 
 export type User_warn = Partial<{
