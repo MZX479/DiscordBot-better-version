@@ -95,3 +95,15 @@ export type User_warn = Partial<{
   login: string;
   warns: Warn[];
 }>;
+
+export type Club = {
+  name: string,
+  description: string,
+  owner: string
+}
+
+export type Users_Club = Partial<{
+  _id: ObjectId,
+  owner: string,
+  club: Club
+}>
