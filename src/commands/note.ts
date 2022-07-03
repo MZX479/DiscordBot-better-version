@@ -46,6 +46,10 @@ const command: Command = {
         }
 
         async main() {
+          const _get_member_data =
+              (await this.users_db.findOne<User_note>({
+                login: interaction.user.id,
+              })) || ({} as User_note);
           let note = <string>args.filter((arg) => arg.name === 'note')[0].value;
           let random_id = Math.floor(Math.random() * 123456789);
 
@@ -56,6 +60,8 @@ const command: Command = {
           };
 
           let new_cooldown = this.time.getTime() + this.cooldown;
+
+          if(_get_member_data.cooldown! > new Date().getTime()) return this.reply_false('cannot!')
 
           await this._overwite_member_data(
             this.interaction.user.id,
