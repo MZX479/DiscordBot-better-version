@@ -97,13 +97,25 @@ export type User_warn = Partial<{
 }>;
 
 export type Club = {
-  name: string,
-  description: string,
-  owner: string
-}
+  name: string;
+  description: string;
+  owner: string;
+};
 
 export type Users_Club = Partial<{
-  _id: ObjectId,
-  owner: string,
-  club: Club
-}>
+  _id: ObjectId;
+  owner: string;
+  club: Club;
+}>;
+
+export type Ban_type = {
+  moderator: string;
+  time: Date;
+  reason: string;
+};
+
+export type User_ban_type = Partial<{
+  _id: ObjectId;
+  victim: string;
+  bans: Ban_type[];
+}>;
