@@ -3,6 +3,10 @@ import * as DB from 'mongodb';
 import { type Command } from '../types';
 import { Response } from '../exports';
 
+interface Kick_record {
+  moderator: string;
+}
+
 /*
 SUB_COMMAND	1	
 SUB_COMMAND_GROUP	2	
@@ -19,12 +23,13 @@ ATTACHMENT	11
 
 const command: Command = {
   slash: {
-    name: '',
-    description: '',
+    name: 'yereer',
+    description: 'dasdsasd',
   },
-  async execute(bot, f, mongo, args, interaction) {EXAMPLE.txt
+  async execute(bot, f, mongo, args, interaction) {
     const db: DB.Db = mongo.db(interaction.guild!.id);
-    try {} catch (err) {
+    try {
+    } catch (err) {
       let e = <{ message: string; name: string }>err;
       bot.users.cache
         .get(f.config.owner)

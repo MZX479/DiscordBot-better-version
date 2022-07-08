@@ -24,7 +24,7 @@ const event = async function (
   //   });
 
   await interaction.reply({
-    content: 'Загружаю вашу команду!',
+    content: `Loading your command!`,
   });
   command.execute(bot, f, mongo, args, interaction);
 };
