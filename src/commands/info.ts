@@ -44,7 +44,6 @@ const command: Command = {
         .setTitle(filt_item.name)
         .addField('ID', `${filt_item.id}`)
         .addField('Description', `${filt_item.description}`)
-        .addField('RARE', `${filt_item.rare}`)
         .setTimestamp();
 
       interaction.channel!.send({ embeds: [embed] });
