@@ -8,10 +8,6 @@ const event = async (
   f: modulesType | any,
   mongo: MongoClient,
   message: Message
-) => {
-  let ban_words = ['хуй', 'очко', 'моча'];
-
-  let message1 = message.content.split(' ');
-};
+) => {};
 
 export default event;

@@ -56,7 +56,13 @@ const command: Command = {
 
           await this.reply_true(
             `Sucessfully added \`${this.amount}💸\` \n Comeback tommorow!`,
-            { title: 'Success', timestamp: new Date() }
+            {
+              title: 'Success',
+              timestamp: new Date(),
+              thumbnail: {
+                url: 'https://cdn.discordapp.com/emojis/879423640125460500.gif?size=128&quality=lossless',
+              },
+            }
           );
         }
       }

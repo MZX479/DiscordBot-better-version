@@ -23,12 +23,55 @@ ATTACHMENT	11
 
 const command: Command = {
   slash: {
-    name: 'yereer',
-    description: 'dasdsasd',
+    name: 'kick',
+    description: 'kick a user',
+    options: [
+      {
+        name: 'reason',
+        description: 'reason of kick',
+        type: 3,
+        required: true,
+      },
+      {
+        name: 'ping',
+        description: 'ping a user',
+        type: 6,
+      },
+      {
+        name: 'id',
+        description: 'user id',
+        type: 3,
+      },
+    ],
   },
   async execute(bot, f, mongo, args, interaction) {
     const db: DB.Db = mongo.db(interaction.guild!.id);
     try {
+      class Kick {
+        constructor() {
+          this.main();
+        }
+
+        async main() {
+          let member = <Discord.GuildMember>(
+            args.filter((arg) => arg.name === 'ping')[0]?.member
+          );
+          let member_id = <string>(
+            args.filter((arg) => arg.name === 'id')[0]?.value
+          );
+          const reason = <string>(
+            args.filter((arg) => arg.name === 'reason')[0].value
+          );
+
+          if (!member && member_id) {
+            member = await interaction.guild!.members.fetch(member_id);
+          }
+
+          await interaction.guild!.members.kick(member, reason);
+        }
+      }
+
+      new Kick();
     } catch (err) {
       let e = <{ message: string; name: string }>err;
       bot.users.cache

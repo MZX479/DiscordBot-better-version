@@ -35,6 +35,8 @@ const command: Command = {
         async start() {
           const items_db = db.collection('Items');
 
+          let number = 1;
+
           const require_items = await items_db
             .find()
             .sort({
@@ -51,7 +53,7 @@ const command: Command = {
             .setTimestamp(new Date());
 
           for (let item of require_items) {
-            embed.addField(`${item.name}`, `${item.cost}`);
+            embed.addField(`${number++})  ${item.name}`, `${item.cost}`);
           }
 
           interaction.channel!.send({ embeds: [embed] });
