@@ -88,8 +88,6 @@ const command: Command = {
               break;
           }
 
-          let user = <string>interaction.user.id;
-
           if (info.choice === winner?.name) {
             await db._win_bet(info.bet);
             this.reply_true('Congratz. You win!');
