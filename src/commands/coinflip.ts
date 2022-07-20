@@ -50,11 +50,9 @@ const command: Command = {
         }
 
         async start() {
+          const db = new DB();
+          const _get_data = await db._get_data();
           let info = await this.info();
-          const users_db = db.collection('users');
-          const _get_member_data = await users_db.findOne<UserType>({
-            login: interaction.user.id,
-          });
 
           if (
             info.choice !== info.heads.name &&
@@ -64,14 +62,10 @@ const command: Command = {
               timestamp: this.time,
             });
 
-          let game = this.game();
-
           let winner;
           let loser;
-          const user_ballance = _get_member_data?.coins;
 
-          let win_bet = _get_member_data?.coins! - info.bet + info.bet * 2;
-          let lose_bet = _get_member_data?.coins! - info.bet;
+          const user_ballance = _get_data._get_member_data!.coins;
 
           if (!user_ballance || user_ballance <= 0 || info.bet! > user_ballance)
             return this.reply_false('Your ballance is too low!', {
@@ -97,30 +91,10 @@ const command: Command = {
           let user = <string>interaction.user.id;
 
           if (info.choice === winner?.name) {
-            users_db.updateOne(
-              {
-                login: user,
-              },
-              {
-                $set: {
-                  coins: win_bet,
-                },
-              }
-            );
-
+            await db._win_bet(info.bet);
             this.reply_true('Congratz. You win!');
           } else {
-            users_db.updateOne(
-              {
-                login: user,
-              },
-              {
-                $set: {
-                  coins: lose_bet,
-                },
-              }
-            );
-
+            await db.lose_bet(info.bet);
             this.reply_false('Sorry. You lose, try again!');
           }
         }
@@ -154,6 +128,61 @@ const command: Command = {
 
         async game() {
           return Math.floor(Math.random() * 2);
+        }
+      }
+
+      class DB {
+        async _get_data() {
+          const users_db = db.collection('users');
+          const _get_member_data = await users_db.findOne<UserType>({
+            login: interaction.user.id,
+          });
+
+          const return_info = {
+            users_db,
+            _get_member_data,
+          };
+
+          return return_info;
+        }
+
+        async _win_bet(result: number) {
+          if (!result) throw new Error(`${result} was not given!`);
+
+          const _get_data = await this._get_data();
+
+          const new_ballance =
+            _get_data._get_member_data!.coins! - result + result * 2;
+
+          _get_data.users_db.updateOne(
+            {
+              login: interaction.user.id,
+            },
+            {
+              $set: {
+                coins: new_ballance,
+              },
+            }
+          );
+        }
+
+        async lose_bet(result: number) {
+          if (!result) throw new Error(`${result} was not given!`);
+
+          const _get_data = await this._get_data();
+
+          const new_ballance = _get_data._get_member_data!.coins! - result;
+
+          _get_data.users_db.updateOne(
+            {
+              login: interaction.user.id,
+            },
+            {
+              $set: {
+                coins: new_ballance,
+              },
+            }
+          );
         }
       }
 
