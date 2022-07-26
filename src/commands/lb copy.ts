@@ -2,13 +2,12 @@ import * as Discord from 'discord.js';
 import * as DB from 'mongodb';
 import { type Command, UserType } from '../types';
 import { Response } from '../exports';
+
 interface FieldType {
   name: string;
   value: string;
 }
-/** пидор */
 
-type button_labels = 'prev' | 'next';
 /*
 SUB_COMMAND	1	
 SUB_COMMAND_GROUP	2	
@@ -25,16 +24,16 @@ ATTACHMENT	11
 
 const command: Command = {
   slash: {
-    name: 'lb',
+    name: 'lb2',
     description: 'leaderboard',
   },
   async execute(bot, f, mongo, args, interaction) {
     const db: DB.Db = mongo.db(interaction.guild!.id);
     try {
-      const response = new Response(interaction);
+      let response = new Response(interaction);
 
-      const users_db = db.collection('users');
-      const users_data = await users_db
+      let users_db = db.collection('users');
+      let users_data = await users_db
         .find<UserType>({
           coins: {
             $gt: 0,
@@ -54,22 +53,22 @@ const command: Command = {
       let position = 1;
       let current_page = 0;
       let number = 1;
+
       for (const user of users_data) {
         if (!user.login) continue;
         const member = members.get(user.login);
         if (!member) continue;
 
         const field: FieldType = {
-          name: `${position++}. ${member.user.tag}`,
+          name: `${position++}) ${member.user.tag}`,
           value: `${user.coins || 0}`,
         };
 
-        if (!fields[current_page])
-          fields[current_page] = [field]; // [ [field] ] ; curr_page = 0
-        else fields[current_page].push(field); // [ [field, field], [field, field] ] ; curr_page = 0
+        if (!fields[current_page]) fields[current_page] = [field];
+        else fields[current_page].push(field);
 
         number++;
-        if (number >= 2 /**0*/) {
+        if (number >= 2) {
           current_page++;
           number = 1;
         }
@@ -77,23 +76,23 @@ const command: Command = {
 
       if (!fields[0]) return response.reply_false('Pages do not exist!');
       const prev_button = new Discord.MessageButton()
-        .setCustomId('prev')
-        .setLabel('Назад')
+        .setLabel('Previous')
         .setStyle('PRIMARY')
+        .setCustomId('prev')
         .setDisabled(true);
       const next_button = new Discord.MessageButton()
-        .setCustomId('next')
-        .setLabel('Вперед')
-        .setStyle('PRIMARY');
+        .setLabel('Next')
+        .setStyle('PRIMARY')
+        .setCustomId('next');
 
       const manage_buttons = [prev_button, next_button];
 
       for (const field of fields) {
-        const page_embed = new Discord.MessageEmbed({
-          title: 'Доска лидеров',
-          fields: field,
-          timestamp: new Date(),
-        });
+        const page_embed = new Discord.MessageEmbed()
+          .setTitle('Leaderboard')
+          .addFields(field)
+          .setTimestamp(new Date());
+
         embeds.push(page_embed);
       }
 
@@ -102,6 +101,7 @@ const command: Command = {
       const row = new Discord.MessageActionRow().addComponents(
         ...manage_buttons
       );
+
       const menu = (await interaction.followUp({
         embeds: [embeds[current_page]],
         components: embeds[1] ? [row] : undefined,
@@ -113,7 +113,7 @@ const command: Command = {
       });
 
       collector.on('collect', async (button) => {
-        switch (button.customId as button_labels) {
+        switch (button.customId) {
           case 'next':
             if (current_page + 1 > embeds.length - 1)
               return button.update({

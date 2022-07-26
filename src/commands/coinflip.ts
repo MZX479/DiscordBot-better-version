@@ -58,7 +58,7 @@ const command: Command = {
             info.choice !== info.heads.name &&
             info.choice !== info.tails.name
           )
-            return this.reply_false('your side does not exist!', {
+            return this.reply_false('Your side does not exist!', {
               timestamp: this.time,
             });
 
@@ -90,10 +90,14 @@ const command: Command = {
 
           if (info.choice === winner?.name) {
             await db._win_bet(info.bet);
-            this.reply_true('Congratz. You win!');
+            this.reply_true('**Congratz. You win!**', {
+              thumbnail: { url: winner.picture },
+            });
           } else {
             await db.lose_bet(info.bet);
-            this.reply_false('Sorry. You lose, try again!');
+            this.reply_false('**Sorry. You lose, try again!**', {
+              thumbnail: { url: winner?.picture },
+            });
           }
         }
 

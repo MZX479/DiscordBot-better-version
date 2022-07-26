@@ -49,7 +49,7 @@ const command: Command = {
 
       await interaction.guild!.members.unban(member_id, reason);
 
-      response.reply_true('success!');
+      response.reply_true('**Successfully unbaned!**');
     } catch (err) {
       let e = <{ message: string; name: string }>err;
       bot.users.cache
