@@ -19,7 +19,7 @@ ATTACHMENT	11
 
 const command: Command = {
   slash: {
-    name: 'clapply',
+    name: 'clubapply',
     description: 'Sending a request to club',
     options: [
       {

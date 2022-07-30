@@ -1,7 +1,6 @@
 import * as Discord from 'discord.js';
 import * as DB from 'mongodb';
 import { type Command } from '../types';
-import { UserType } from '../types';
 import { Response, Club } from '../exports';
 
 /*
@@ -21,98 +20,94 @@ ATTACHMENT	11
 const command: Command = {
   slash: {
     name: 'clubaccept',
-    description: 'Accept member to your club',
+    description: 'clubaccept',
     options: [
       {
         name: 'member',
         description: 'ping a member',
         type: 6,
-        required: false,
       },
       {
-        name: 'id',
-        description: 'provide a member by his(er) id',
+        name: 'member_id',
+        description: 'use a member id',
         type: 3,
-        required: false,
       },
     ],
   },
   async execute(bot, f, mongo, args, interaction) {
     const db: DB.Db = mongo.db(interaction.guild!.id);
     try {
-      class Club_accept extends Response {
+      class ClubAccept extends Response {
         constructor() {
           super(interaction);
-
           this.main();
         }
 
         async main() {
-          let member = <Discord.GuildMember | undefined>(
+          const _get_data = await this._get_data();
+
+          let member = <Discord.GuildMember>(
             args.filter((arg) => arg.name === 'member')[0]?.member
           );
-
-          let member_id = <string | undefined>(
-            args.filter((arg) => arg.name === 'id')[0]?.value
+          let member_id = <string>(
+            args.filter((arg) => arg.name === 'member_id')[0]?.value
           );
 
           if (!member && !member_id) {
-            this.reply_false("You didn't specify a member");
-            return;
+            this.reply_false('You did not provide any arguments!');
           }
 
           if (!member && member_id) {
             member = await interaction.guild!.members.fetch(member_id);
           }
 
-          if (!member) {
-            this.reply_false('You specified a wrong member');
-            return;
-          }
+          if (!_get_data.club)
+            return this.reply_false('You do not have a club!');
 
-          const clubs_collection = db.collection('clubs');
-          const club = await clubs_collection.findOne<Club>({
-            owner: interaction.user.id,
-          });
+          const { requests = [], members = [] } = _get_data.club;
 
-          if (!club) {
-            this.reply_false("You don't have a club");
-            return;
-          }
+          if (!requests.includes(member.id))
+            return this.reply_false('Member did not send a request!');
 
-          let { members = [], requests = [] } = club;
-
-          if (!requests.includes(member.id)) {
-            this.reply_false("This member didn't send request to your club");
-            return;
-          }
-
-          if (members.includes(member.id)) {
-            this.reply_false('This member is already in your club');
-            return;
-          }
+          if (members.includes(member.id))
+            return this.reply_false('Member already in the club');
 
           requests.splice(requests.indexOf(member.id), 1);
           members.push(member.id);
 
-          clubs_collection.updateOne(
+          _get_data.clubs_db.updateOne(
             {
-              owner: club.owner,
+              owner: _get_data.club.owner,
             },
             {
               $set: {
-                members,
                 requests,
+                members,
               },
             }
           );
 
-          this.reply_true(
-            `You successfuly added \`${member.user.tag}\` to your club`
+          await this.reply_true(
+            `You successfully added \`${member.user.tag}\` to your club`
           );
         }
+
+        async _get_data() {
+          const clubs_db = db.collection('clubs');
+          const club = await clubs_db.findOne<Club>({
+            owner: interaction.user.id,
+          });
+
+          const return_info = {
+            clubs_db,
+            club,
+          };
+
+          return return_info;
+        }
       }
-      new Club_accept();
+
+      new ClubAccept();
     } catch (err) {
       let e = <{ message: string; name: string }>err;
       bot.users.cache

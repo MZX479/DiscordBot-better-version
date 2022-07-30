@@ -27,7 +27,7 @@ export class Response {
     return result_embed;
   }
 
-  async reply_true(description: string, options: {} = {}) {
+  async reply_true(description: string, options: {} = {}, ephemeral?: boolean) {
     if (!description)
       throw new Error('description was not provided (true_response)');
 
@@ -37,7 +37,7 @@ export class Response {
       ...options,
     });
 
-    return this.send_embed(await reply_true);
+    return this.send_embed(await reply_true, ephemeral);
   }
 
   async reply_false(
@@ -114,4 +114,14 @@ export type User_ban_type = Partial<{
   _id: ObjectId;
   victim: string;
   bans: Ban_type[];
+}>;
+
+export type Items_type = Partial<{
+  _id: ObjectId;
+  name: string;
+  cost: number;
+  description: string;
+  rare: number;
+  role: string;
+  customId: number;
 }>;
