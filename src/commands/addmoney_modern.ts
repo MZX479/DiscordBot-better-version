@@ -160,9 +160,10 @@ const command: Command = {
         }
       }
 
-      class DB {
+      class DB extends AddMoney {
         member_id: string;
         constructor(member_id: string) {
+          super();
           this.member_id = member_id;
         }
         async _get_data() {

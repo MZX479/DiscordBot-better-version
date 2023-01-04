@@ -32,6 +32,7 @@ export type UserType = Partial<{
   isMuted: {};
   mutes: Array<{}>;
   rep_cooldown: number;
+  inventory: [];
 }>;
 export type slashType = {
   name: string;
